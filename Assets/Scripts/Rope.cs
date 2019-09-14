@@ -4,24 +4,28 @@ using UnityEngine;
 
 public class Rope : MonoBehaviour
 {
+	public GameObject craneTip;
+	public GameObject ropeEnd;
+	public float ropeSegLen = 0.25f;
+	public int segmentLength = 35;
+	public float lineWidth = 0.1f;
 
 	private LineRenderer lineRenderer;
 	private List<RopeSegment> ropeSegments = new List<RopeSegment>();
-	private float ropeSegLen = 0.25f;
-	private int segmentLength = 35;
-	private float lineWidth = 0.1f;
 
 	// Use this for initialization
 	void Start()
 	{
 		this.lineRenderer = this.GetComponent<LineRenderer>();
-		Vector3 ropeStartPoint = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+		Vector3 ropeStartPoint = craneTip.gameObject.transform.position;
 
 		for (int i = 0; i < segmentLength; i++)
 		{
 			this.ropeSegments.Add(new RopeSegment(ropeStartPoint));
 			ropeStartPoint.y -= ropeSegLen;
 		}
+
+		this.updateEndSegment ();
 	}
 
 	// Update is called once per frame
@@ -61,7 +65,7 @@ public class Rope : MonoBehaviour
 	{
 		//Constraint to Mouse
 		RopeSegment firstSegment = this.ropeSegments[0];
-		firstSegment.posNow = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+		firstSegment.posNow = craneTip.gameObject.transform.position;
 		this.ropeSegments[0] = firstSegment;
 
 		for (int i = 0; i < this.segmentLength - 1; i++)
@@ -95,6 +99,8 @@ public class Rope : MonoBehaviour
 				this.ropeSegments[i + 1] = secondSeg;
 			}
 		}
+			
+		this.updateEndSegment ();
 	}
 
 	private void DrawRope()
@@ -111,6 +117,12 @@ public class Rope : MonoBehaviour
 
 		lineRenderer.positionCount = ropePositions.Length;
 		lineRenderer.SetPositions(ropePositions);
+	}
+
+	private void updateEndSegment()
+	{
+		RopeSegment lastSegment = this.ropeSegments [this.ropeSegments.Count - 1];
+		ropeEnd.transform.position = new Vector3(lastSegment.posNow.x, lastSegment.posNow.y);
 	}
 
 	public struct RopeSegment
